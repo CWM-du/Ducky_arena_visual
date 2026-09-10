@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
+from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase
 
-from duckies.models import Ducky, InventoryItem, Item
+from duckies.models import AttackItem, Ducky, InventoryItem, Item
 
 User = get_user_model()
 
@@ -30,6 +31,26 @@ class ItemModelTests(TestCase):
         self.assertEqual(item.item_type, Item.ItemType.HEAD)
         self.assertEqual(item.rarity, Item.Rarity.COMMON)
         self.assertTrue(item.is_active)
+
+
+class AttackCatalogTests(TestCase):
+    def test_seed_catalog_creates_temporary_pvp_attacks(self):
+        call_command("seed_catalog", verbosity=0)
+
+        attacks = AttackItem.objects.filter(is_active=True)
+        self.assertEqual(attacks.count(), 30)
+        self.assertEqual(
+            set(attacks.values_list("family", flat=True)),
+            {
+                AttackItem.Family.LOCK,
+                AttackItem.Family.INTERFERENCE,
+                AttackItem.Family.DELAY,
+                AttackItem.Family.SABOTAGE,
+                AttackItem.Family.CONTROL,
+                AttackItem.Family.COMBO,
+            },
+        )
+        self.assertFalse(attacks.filter(price__lte=0).exists())
 
 
 class InventoryModelTests(TestCase):

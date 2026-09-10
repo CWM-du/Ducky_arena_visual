@@ -1,7 +1,9 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from .models import Ducky, InventoryItem, Item
+from accounts.models import Profile
+
+from .models import AttackInventory, AttackItem, Ducky, InventoryItem, Item
 
 
 @transaction.atomic
@@ -51,3 +53,25 @@ def unequip_inventory_item(inventory_item: InventoryItem):
     inventory_item.equipped = False
     inventory_item.save(update_fields=["equipped"])
     return inventory_item
+
+
+@transaction.atomic
+def purchase_attack(user, attack: AttackItem) -> AttackInventory:
+    """Buy one usable attack charge without allowing a negative coin balance."""
+    if not attack.is_active:
+        raise ValidationError("Este ataque no está disponible en la tienda.")
+
+    profile, _ = Profile.objects.select_for_update().get_or_create(user=user)
+    if profile.ducky_coins < attack.price:
+        raise ValidationError("No tienes suficientes Ducky Coins.")
+
+    profile.ducky_coins -= attack.price
+    profile.save(update_fields=["ducky_coins"])
+    owned_attack, _ = AttackInventory.objects.select_for_update().get_or_create(
+        owner=user,
+        attack=attack,
+        defaults={"quantity": 0},
+    )
+    owned_attack.quantity += 1
+    owned_attack.save(update_fields=["quantity", "updated_at"])
+    return owned_attack

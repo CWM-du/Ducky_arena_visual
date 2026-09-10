@@ -1,12 +1,18 @@
-{% extends 'core/base.html' %}
+<h1>
+    Hola, {{ request.user.username }}
+</h1>
 
-{% block title %}Dashboard | Ducky Arena{% endblock %}
+<p>
+    Nivel:
+    {{ request.user.profile.level }}
+</p>
 
-{% block content %}
-<section class="dashboard-shell">
-    <div class="panel">
-        <h1>Dashboard</h1>
-        <p>Tu arena personalizada estará aquí.</p>
-    </div>
-</section>
-{% endblock %}
+<p>
+    XP:
+    {{ request.user.profile.xp }}
+</p>
+
+<p>
+    Ducky Coins:
+    {{ request.user.profile.ducky_coins }}
+</p>

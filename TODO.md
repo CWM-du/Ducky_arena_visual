@@ -6,8 +6,12 @@
 - [X] Confirm shared base template/navigation with the other teams.
 
 ## MVP verification
-- [ ] Populate the catalog with approved Item records.
-- [ ] Upload final Item artwork.
+- [x] Modelo Item implementado
+- [x] Catálogo administrable
+- [x] Seed command implementado
+- [x] Populate the catalog with approved Item records.
+- [x] Upload final Item artwork.
+- [x] Add 10 special Arcano item sets based on programming languages (40 items).
 - [ ] Run `python manage.py check --deploy`.
 - [ ] Run `python manage.py test duckies`.
 - [ ] Test ownership isolation with two real users.

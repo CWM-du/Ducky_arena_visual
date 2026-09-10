@@ -147,6 +147,14 @@ h2 { letter-spacing: -.025em; }
 .rarity-epic { border-top: 2px solid #b28cff; }
 .rarity-legendary { border-top: 2px solid #ffc857; }
 .equipped-state { margin: 16px 0 10px; color: var(--accent); font-size: 10px; font-weight: 900; letter-spacing: .14em; }
+.attack-icon { min-height: 120px; display: grid; place-items: center; font-size: 46px; background: linear-gradient(135deg, rgba(255, 200, 87, .15), rgba(82, 224, 208, .08)); border-bottom: 1px solid var(--line); }
+.coin-balance { color: var(--accent-2); white-space: nowrap; }
+.set-requirement { color: var(--accent); font-size: 12px; font-weight: 700; }
+.attack-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+.attack-stats div { padding: 9px; border: 1px solid var(--line); border-radius: 9px; background: rgba(255,255,255,.02); }
+.attack-stats dt { color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
+.attack-stats dd { margin: 4px 0 0; font-weight: 800; font-size: 13px; }
+.challenge-copy { min-height: 48px; font-size: 13px; }
 
 .narrow { max-width: 640px; margin: 30px auto; padding: 34px; }
 .stack-form { display: grid; gap: 18px; }

@@ -1,6 +1,6 @@
 from django.contrib import admin
+from .models import Profile, Classroom, Announcement
 
-# Register your models here.
-from .models import ProfileUser
-
-admin.site.register(ProfileUser)    
+admin.site.register(Profile)
+admin.site.register(Classroom)
+admin.site.register(Announcement)

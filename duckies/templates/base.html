@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Ducky Quiz Arenas{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'duckies/css/app.css' %}">
+</head>
+<body>
+<div class="app-shell">
+    <header class="topbar">
+        <a class="brand" href="/"><span class="brand-mark">DQ</span><span>Ducky Quiz Arenas</span></a>
+        <nav class="nav">
+            <a href="{% url 'duckies:my_ducky' %}">Mi Ducky</a>
+            <a href="{% url 'duckies:inventory' %}">Inventario</a>
+            <a href="{% url 'duckies:attack_shop' %}">Tienda de ataques</a>
+        </nav>
+        {% if request.user.is_authenticated %}<span class="muted">{{ request.user.username }}</span>{% endif %}
+    </header>
+    <main class="page">
+        {% if messages %}<div class="messages">{% for message in messages %}<div class="message message-{{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="footer"><strong>Ducky Quiz Arenas</strong><span>Aprende · Compite · Gana</span></footer>
+</div>
+</body>
+</html>
