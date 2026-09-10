@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Mi Ducky — {{ ducky.name }}{% endblock %}
+{% block content %}
+<section class="hero-grid">
+    <div class="ducky-stage panel">
+        <div class="eyebrow">PLAYER AVATAR</div>
+        <div class="ducky-visual" aria-label="Representación visual de {{ ducky.name }}" role="img">
+            <div class="duck-body"></div>
+            <div class="duck-eye duck-eye-left"></div>
+            <div class="duck-eye duck-eye-right"></div>
+            <div class="duck-beak"></div>
+            <div class="duck-item-layer duck-head-layer">
+                {% for equipped in equipped_items %}
+                    {% if equipped.item.item_type == "HEAD" %}{{ equipped.item.name }}{% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <div class="ducky-name">{{ ducky.name }}</div>
+        <div class="ducky-meta">Ducky personal · Nivel de identidad</div>
+    </div>
+
+    <div class="panel profile-panel">
+        <div class="eyebrow">MI DUCKY</div>
+        <div class="profile-heading">
+            <div>
+                <h1>{{ ducky.name }}</h1>
+                <p class="muted">Tu identidad dentro de Ducky Quiz Arenas.</p>
+            </div>
+            <span class="status-dot">ONLINE</span>
+        </div>
+
+        <div class="equipment-list">
+            {% for item_type, label in item_types %}
+            <div class="equipment-row">
+                <span>{{ label }}</span>
+                <strong>
+                    {% if item_type == "HEAD" %}{{ equipped_by_type.HEAD.item.name|default:"Ninguno" }}
+                    {% elif item_type == "EYES" %}{{ equipped_by_type.EYES.item.name|default:"Ninguno" }}
+                    {% elif item_type == "BODY" %}{{ equipped_by_type.BODY.item.name|default:"Ninguno" }}
+                    {% elif item_type == "ACCESSORY" %}{{ equipped_by_type.ACCESSORY.item.name|default:"Ninguno" }}
+                    {% endif %}
+                </strong>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="action-grid">
+            <a class="button button-primary" href="{% url 'duckies:customize' %}">Personalizar</a>
+            <a class="button" href="{% url 'duckies:inventory' %}">Ver inventario</a>
+            <a class="button button-ghost" href="{% url 'duckies:rename' %}">Cambiar nombre</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,8 @@
+[project]
+name = "ducky-quiz-arenas"
+version = "1.0.0"
+description = "Django Ducky inventory and customization application"
+requires-python = ">=3.12"
+
+[tool.django]
+settings-module = "config.settings"

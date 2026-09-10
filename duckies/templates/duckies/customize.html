@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Personaliza tu Ducky — Ducky Quiz Arenas{% endblock %}
+{% block content %}
+<section class="page-heading">
+    <div>
+        <div class="eyebrow">LOADOUT</div>
+        <h1>Personaliza tu Ducky</h1>
+        <p class="muted">Solo puedes seleccionar objetos que ya pertenecen a tu inventario.</p>
+    </div>
+</section>
+
+<form method="post">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+        <div class="message message-error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="customize-layout">
+        <div class="panel customize-form">
+            {% for field in form %}
+            <fieldset class="choice-group">
+                <legend>{{ field.label }}</legend>
+                {{ field }}
+                {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+            </fieldset>
+            {% endfor %}
+            <button class="button button-primary full-width" type="submit">Guardar equipamiento</button>
+        </div>
+
+        <aside class="panel preview-panel">
+            <div class="eyebrow">PREVIEW</div>
+            <div class="ducky-visual compact">
+                <div class="duck-body"></div>
+                <div class="duck-eye duck-eye-left"></div>
+                <div class="duck-eye duck-eye-right"></div>
+                <div class="duck-beak"></div>
+            </div>
+            <h2>{{ ducky.name }}</h2>
+            <p class="muted">Tu configuración se aplicará como una única operación.</p>
+        </aside>
+    </div>
+</form>
+{% endblock %}
