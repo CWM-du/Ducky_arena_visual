@@ -2,8 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from accounts.models import Profile
-from duckies.models import AttackInventory, AttackItem, Ducky, InventoryItem, Item
+from duckies.models import Ducky, InventoryItem, Item
 
 User = get_user_model()
 
@@ -42,6 +41,17 @@ class DuckyViewTests(TestCase):
     def test_anonymous_user_cannot_access_ducky(self):
         response = self.client.get(reverse("duckies:my_ducky"))
         self.assertEqual(response.status_code, 302)
+
+    def test_my_ducky_shows_equipped_item_image(self):
+        self.carlos_inventory.equipped = True
+        self.carlos_inventory.item.image = "ducky_items/sombrero-python.png"
+        self.carlos_inventory.item.save(update_fields=["image"])
+
+        self.client.login(username="carlos", password="pass12345")
+        response = self.client.get(reverse("duckies:my_ducky"))
+
+        self.assertContains(response, "Sombrero Python")
+        self.assertContains(response, "ducky_items/sombrero-python.png")
 
     def test_user_sees_only_own_inventory(self):
         self.client.login(username="carlos", password="pass12345")
@@ -118,51 +128,3 @@ class DuckyViewTests(TestCase):
         inventory = list(response.context["inventory"])
         self.assertEqual(len(inventory), 1)
         self.assertEqual(inventory[0].item, body_item)
-
-    def test_player_can_buy_an_attack_from_the_shop(self):
-        attack = AttackItem.objects.create(
-            name="Runtime Delay",
-            description="Retraso temporal.",
-            family=AttackItem.Family.DELAY,
-            effect=AttackItem.Effect.DELAY,
-            rarity=AttackItem.Rarity.COMMON,
-            duration_seconds=3,
-            cooldown_seconds=18,
-            price=55,
-            activation_challenge="Calcula la salida.",
-        )
-        profile, _ = Profile.objects.get_or_create(user=self.carlos)
-        profile.ducky_coins = 60
-        profile.save(update_fields=["ducky_coins"])
-        self.client.login(username="carlos", password="pass12345")
-
-        response = self.client.post(
-            reverse("duckies:purchase_attack", args=[attack.pk])
-        )
-
-        self.assertRedirects(response, reverse("duckies:attack_shop"))
-        profile.refresh_from_db()
-        self.assertEqual(profile.ducky_coins, 5)
-        self.assertEqual(
-            AttackInventory.objects.get(owner=self.carlos, attack=attack).quantity,
-            1,
-        )
-
-    def test_attack_shop_displays_catalog_entries(self):
-        AttackItem.objects.create(
-            name="Syntax Lock",
-            description="Bloqueo temporal.",
-            family=AttackItem.Family.LOCK,
-            effect=AttackItem.Effect.LOCK,
-            rarity=AttackItem.Rarity.RARE,
-            duration_seconds=8,
-            cooldown_seconds=24,
-            price=90,
-            activation_challenge="Identifica la categoría correcta.",
-        )
-        self.client.login(username="carlos", password="pass12345")
-
-        response = self.client.get(reverse("duckies:attack_shop"))
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Syntax Lock")

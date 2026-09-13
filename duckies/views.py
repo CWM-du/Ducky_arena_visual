@@ -1,14 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import CustomizationForm, DuckyNameForm
-from accounts.models import Profile
-
-from .models import AttackInventory, AttackItem, Ducky, InventoryItem, Item
-from .services import equip_inventory_item, purchase_attack, unequip_inventory_item
+from .models import Ducky, InventoryItem, Item
+from .services import equip_inventory_item, unequip_inventory_item
 
 
 @login_required
@@ -172,51 +169,3 @@ def unequip_item(request, pk):
         f"{inventory_item.item.name} desequipado.",
     )
     return redirect("duckies:my_ducky")
-
-
-@login_required
-def attack_shop(request):
-    profile, _ = Profile.objects.get_or_create(user=request.user)
-    attacks = AttackItem.objects.filter(is_active=True)
-    family = request.GET.get("family", "").upper()
-    valid_families = {value for value, _ in AttackItem.Family.choices}
-    if family in valid_families:
-        attacks = attacks.filter(family=family)
-    else:
-        family = ""
-
-    quantities = dict(
-        AttackInventory.objects.filter(
-            owner=request.user,
-            attack__in=attacks,
-        ).values_list("attack_id", "quantity")
-    )
-    attacks = list(attacks)
-    for attack in attacks:
-        attack.owned_quantity = quantities.get(attack.pk, 0)
-    return render(
-        request,
-        "duckies/attack_shop.html",
-        {
-            "attacks": attacks,
-            "quantities": quantities,
-            "profile": profile,
-            "families": AttackItem.Family.choices,
-            "active_family": family,
-        },
-    )
-
-
-@login_required
-def purchase_attack_item(request, pk):
-    if request.method != "POST":
-        return redirect("duckies:attack_shop")
-
-    attack = get_object_or_404(AttackItem, pk=pk, is_active=True)
-    try:
-        purchase_attack(request.user, attack)
-    except ValidationError as error:
-        messages.error(request, str(error))
-    else:
-        messages.success(request, f"Has adquirido {attack.name}.")
-    return redirect("duckies:attack_shop")

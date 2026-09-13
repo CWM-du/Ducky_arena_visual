@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import AttackInventory, AttackItem, Ducky, InventoryItem, Item
+from .models import ActiveEffect, Attack, Ducky, InventoryItem, Item, ItemResistance
 
 
 @admin.register(Ducky)
@@ -28,19 +28,26 @@ class InventoryItemAdmin(admin.ModelAdmin):
     list_select_related = ("ducky", "item")
 
 
-@admin.register(AttackItem)
-class AttackItemAdmin(admin.ModelAdmin):
-    list_display = (
-        "name", "family", "effect", "language", "price", "cooldown_seconds",
-        "is_active",
-    )
-    list_filter = ("family", "effect", "rarity", "language", "is_active")
-    search_fields = ("name", "description", "activation_challenge")
+@admin.register(Attack)
+class AttackAdmin(admin.ModelAdmin):
+    list_display = ("name", "effect_type", "language", "power", "duration_seconds", "cooldown_seconds", "difficulty", "is_active")
+    readonly_fields = ("created_at",)
+    list_filter = ("effect_type", "language", "difficulty", "is_active")
+    search_fields = ("name", "description", "language")
 
 
-@admin.register(AttackInventory)
-class AttackInventoryAdmin(admin.ModelAdmin):
-    list_display = ("owner", "attack", "quantity", "updated_at")
-    list_filter = ("attack__family", "attack__rarity")
-    search_fields = ("owner__username", "attack__name")
-    list_select_related = ("owner", "attack")
+@admin.register(ItemResistance)
+class ItemResistanceAdmin(admin.ModelAdmin):
+    list_display = ("item", "effect_type", "reduction_percent", "notes")
+    list_filter = ("effect_type", "reduction_percent")
+    search_fields = ("item__name", "notes")
+    list_select_related = ("item",)
+
+
+@admin.register(ActiveEffect)
+class ActiveEffectAdmin(admin.ModelAdmin):
+    list_display = ("ducky", "attack", "effect_type", "power", "expires_at", "created_at")
+    list_filter = ("effect_type",)
+    search_fields = ("ducky__name", "attack__name")
+    readonly_fields = ("created_at",)
+    list_select_related = ("ducky", "attack")

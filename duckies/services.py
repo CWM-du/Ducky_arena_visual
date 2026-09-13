@@ -1,9 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from accounts.models import Profile
-
-from .models import AttackInventory, AttackItem, Ducky, InventoryItem, Item
+from .models import Ducky, InventoryItem, Item
 
 
 @transaction.atomic
@@ -54,24 +52,45 @@ def unequip_inventory_item(inventory_item: InventoryItem):
     inventory_item.save(update_fields=["equipped"])
     return inventory_item
 
+from datetime import timedelta
+from django.utils import timezone
+from .models import ActiveEffect, Attack
+
 
 @transaction.atomic
-def purchase_attack(user, attack: AttackItem) -> AttackInventory:
-    """Buy one usable attack charge without allowing a negative coin balance."""
+def resolve_attack(attacker: Ducky, defender: Ducky, attack: Attack):
+    """Apply a temporary PvP progression debuff after defense mitigation.
+
+    The defender's currently equipped items reduce the attack's power according
+    to ItemResistance. No permanent inventory/progression data is removed.
+    """
+    if attacker.pk == defender.pk:
+        raise ValidationError("No puedes atacarte a ti mismo.")
     if not attack.is_active:
-        raise ValidationError("Este ataque no está disponible en la tienda.")
+        raise ValidationError("Ese ataque no está activo.")
 
-    profile, _ = Profile.objects.select_for_update().get_or_create(user=user)
-    if profile.ducky_coins < attack.price:
-        raise ValidationError("No tienes suficientes Ducky Coins.")
-
-    profile.ducky_coins -= attack.price
-    profile.save(update_fields=["ducky_coins"])
-    owned_attack, _ = AttackInventory.objects.select_for_update().get_or_create(
-        owner=user,
-        attack=attack,
-        defaults={"quantity": 0},
+    equipped = (
+        defender.inventory
+        .select_related("item")
+        .filter(equipped=True, item__is_active=True)
     )
-    owned_attack.quantity += 1
-    owned_attack.save(update_fields=["quantity", "updated_at"])
-    return owned_attack
+    reduction = sum(
+        resistance.reduction_percent
+        for inventory_item in equipped
+        for resistance in inventory_item.item.resistances.all()
+        if resistance.effect_type == attack.effect_type
+    )
+    reduction = min(reduction, 100)
+    final_power = max(0, attack.power * (100 - reduction) // 100)
+
+    if final_power == 0:
+        return {"applied": False, "power": 0, "reduction_percent": reduction, "effect": None}
+
+    effect = ActiveEffect.objects.create(
+        ducky=defender,
+        attack=attack,
+        effect_type=attack.effect_type,
+        power=final_power,
+        expires_at=timezone.now() + timedelta(seconds=attack.duration_seconds),
+    )
+    return {"applied": True, "power": final_power, "reduction_percent": reduction, "effect": effect}

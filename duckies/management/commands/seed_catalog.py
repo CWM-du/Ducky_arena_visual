@@ -1,5 +1,11 @@
+import re
+
 from django.core.management.base import BaseCommand
-from duckies.models import AttackItem, Item
+from duckies.models import Item
+
+
+def item_image_filename(name):
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") + ".png"
 
 
 CATALOG = [
@@ -235,55 +241,13 @@ for set_name, language, pieces in ARCANE_SETS:
     for item_name, item_type, rarity, description in pieces:
         CATALOG.append({
             "name": item_name,
-            "image": "",
+            "image": f"ducky_items/{item_image_filename(item_name)}",
             "item_type": item_type,
             "category": "ARCANO",
             "set_name": set_name,
             "rarity": rarity,
             "description": description,
         })
-
-
-# Purchasable attacks are consumable charges.  Their effects are deliberately
-# temporary: none removes permanent XP, level progress or cosmetic equipment.
-ATTACK_CATALOG = [
-    # name, family, effect, rarity, duration, cooldown, price, activation prompt, language, required set
-    ("Syntax Lock", "LOCK", "LOCK", "RARE", 8, 24, 90, "Identifica la categoría de código correcta.", "", ""),
-    ("Freeze Process", "LOCK", "FREEZE", "EPIC", 6, 30, 130, "Resuelve una pregunta de control de flujo.", "", ""),
-    ("Function Block", "LOCK", "SILENCE", "RARE", 10, 28, 110, "Identifica la función que produce el resultado.", "", ""),
-    ("Promise Lock", "LOCK", "LOCK", "EPIC", 7, 26, 140, "Distingue una Promise resuelta de una pendiente.", "JavaScript", "Arcano JavaScript"),
-    ("Borrow Lock", "LOCK", "SILENCE", "EPIC", 8, 28, 145, "Identifica un préstamo válido en Rust.", "Rust", "Arcano Rust"),
-
-    ("Code Scramble", "INTERFERENCE", "SCRAMBLE", "COMMON", 8, 20, 65, "Ordena correctamente un bloque de código.", "", ""),
-    ("Bug Injection", "INTERFERENCE", "SCRAMBLE", "RARE", 10, 25, 100, "Encuentra el bug en un fragmento corto.", "", ""),
-    ("Fog of Code", "INTERFERENCE", "FOG", "RARE", 8, 24, 95, "Completa el valor oculto de una variable.", "", ""),
-    ("Indentation Trap", "INTERFERENCE", "SCRAMBLE", "EPIC", 9, 26, 135, "Identifica el nivel de indentación correcto.", "Python", "Arcano Python"),
-    ("Callback Trap", "INTERFERENCE", "SCRAMBLE", "EPIC", 9, 26, 135, "Identifica cuándo se ejecuta un callback.", "JavaScript", "Arcano JavaScript"),
-
-    ("Runtime Delay", "DELAY", "DELAY", "COMMON", 3, 18, 55, "Calcula la salida de una expresión simple.", "", ""),
-    ("Slow Compile", "DELAY", "SLOW", "RARE", 10, 25, 100, "Detecta qué paso ralentiza un programa.", "", ""),
-    ("Infinite Loop", "DELAY", "PUZZLE", "EPIC", None, 32, 150, "¿Qué falta para que un while avance?", "Python", "Arcano Python"),
-    ("Async Delay", "DELAY", "DELAY", "EPIC", 5, 25, 125, "Ordena las fases de una operación async.", "Swift", "Arcano Swift"),
-    ("Memory Leak", "DELAY", "SLOW", "EPIC", 10, 30, 145, "Identifica el recurso que debe liberarse.", "C++", "Arcano C++"),
-
-    ("Runtime Error", "SABOTAGE", "RESET", "RARE", None, 30, 115, "Encuentra la línea que lanza una excepción.", "", ""),
-    ("Garbage Collector", "SABOTAGE", "STACK", "EPIC", None, 32, 145, "Identifica qué dato ya no tiene referencias.", "Java", "Arcano Java"),
-    ("Exception Throw", "SABOTAGE", "STACK", "RARE", 12, 28, 110, "Selecciona el bloque que captura la excepción.", "Java", "Arcano Java"),
-    ("Session Break", "SABOTAGE", "RESET", "EPIC", None, 30, 135, "Identifica una sesión web válida.", "PHP", "Arcano PHP"),
-    ("Lifetime Trap", "SABOTAGE", "SLOW", "EPIC", 8, 30, 145, "Relaciona una referencia con su lifetime válido.", "Rust", "Arcano Rust"),
-
-    ("Refactor", "CONTROL", "REDIRECT", "RARE", None, 24, 100, "Elige la refactorización que conserva el comportamiento.", "", ""),
-    ("Target Override", "CONTROL", "REDIRECT", "RARE", None, 24, 105, "Selecciona la categoría objetivo adecuada.", "", ""),
-    ("Dependency Wall", "CONTROL", "WALL", "EPIC", None, 32, 150, "Resuelve una dependencia para abrir el siguiente paso.", "", ""),
-    ("Class Override", "CONTROL", "REDIRECT", "EPIC", None, 28, 135, "Identifica el método sobrescrito correcto.", "C#", "Arcano C#"),
-    ("Ownership Claim", "CONTROL", "WALL", "EPIC", 8, 28, 145, "Identifica quién posee el valor en Rust.", "Rust", "Arcano Rust"),
-
-    ("Combo Breaker", "COMBO", "RESET", "COMMON", None, 22, 75, "Resuelve una pregunta rápida de sintaxis.", "", ""),
-    ("Event Loop", "COMBO", "DELAY", "RARE", 5, 25, 110, "Predice el orden del event loop.", "JavaScript", "Arcano JavaScript"),
-    ("Pointer Trap", "COMBO", "PUZZLE", "EPIC", None, 30, 145, "Identifica el puntero que referencia el valor correcto.", "C++", "Arcano C++"),
-    ("Ruby Refactor", "COMBO", "SCRAMBLE", "RARE", 8, 26, 115, "Elige la cadena de métodos Ruby equivalente.", "Ruby", "Arcano Ruby"),
-    ("Force Unwrap", "COMBO", "RESET", "EPIC", None, 28, 135, "Identifica un Optional que puede desempaquetarse.", "Swift", "Arcano Swift"),
-]
 
 
 class Command(BaseCommand):
@@ -317,42 +281,5 @@ class Command(BaseCommand):
             self.style.SUCCESS(
                 f"Catálogo cargado: {created} creados, {updated} actualizados, "
                 f"{len(CATALOG)} registros definidos."
-            )
-        )
-
-        attack_created = 0
-        attack_updated = 0
-        for (
-            name, family, effect, rarity, duration, cooldown, price,
-            activation_challenge, language, required_set,
-        ) in ATTACK_CATALOG:
-            attack, was_created = AttackItem.objects.update_or_create(
-                name=name,
-                defaults={
-                    "family": family,
-                    "effect": effect,
-                    "rarity": rarity,
-                    "duration_seconds": duration,
-                    "cooldown_seconds": cooldown,
-                    "price": price,
-                    "activation_challenge": activation_challenge,
-                    "language": language,
-                    "required_set": required_set,
-                    "description": (
-                        "Efecto PvP temporal. Debes superar un desafío de código "
-                        "para activarlo."
-                    ),
-                    "is_active": True,
-                },
-            )
-            if was_created:
-                attack_created += 1
-            else:
-                attack_updated += 1
-
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"Ataques cargados: {attack_created} creados, "
-                f"{attack_updated} actualizados, {len(ATTACK_CATALOG)} definidos."
             )
         )

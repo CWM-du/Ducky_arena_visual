@@ -53,19 +53,3 @@ funcionando igual. `set_name` identifica el conjunto al que pertenece cada pieza
 
 Las piezas Arcano se crean sin artwork en esta iteración para no confundir arte
 conceptual con artwork final aprobado.
-
-## Tienda de ataques PvP
-
-La ruta `/duckies/shop/attacks/` ofrece 30 cargas de ataque adquiribles con
-`Ducky Coins`. Los ataques no son equipamiento cosmético: cada compra añade
-una carga al inventario de ataques del jugador. Para activarla durante una
-partida, el jugador deberá resolver el desafío de código asociado.
-
-Familias disponibles: `LOCK`, `INTERFERENCE`, `DELAY`, `SABOTAGE`, `CONTROL`
-y `COMBO`. Todos los efectos son temporales o rompen una racha; el catálogo no
-contiene efectos que reduzcan XP, nivel o progreso permanente.
-
-Cada ataque define tipo de efecto, duración, cooldown, precio, rareza, desafío
-de activación y, cuando corresponde, lenguaje y set Arcano requerido. Ejecuta
-`python manage.py seed_catalog` tras las migraciones para cargarlo de forma
-idempotente.

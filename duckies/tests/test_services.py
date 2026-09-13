@@ -1,15 +1,8 @@
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from accounts.models import Profile
-from duckies.models import AttackInventory, AttackItem, Ducky, InventoryItem, Item
-from duckies.services import (
-    equip_inventory_item,
-    grant_item,
-    purchase_attack,
-    unequip_inventory_item,
-)
+from duckies.models import Ducky, InventoryItem, Item
+from duckies.services import equip_inventory_item, grant_item, unequip_inventory_item
 
 User = get_user_model()
 
@@ -97,41 +90,3 @@ class InventoryServiceTests(TestCase):
         unequip_inventory_item(inventory_item)
         inventory_item.refresh_from_db()
         self.assertFalse(inventory_item.equipped)
-
-
-class AttackShopServiceTests(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(username="luna", password="pass12345")
-        self.profile, _ = Profile.objects.get_or_create(
-            user=self.user,
-            defaults={"ducky_coins": 200},
-        )
-        self.profile.ducky_coins = 200
-        self.profile.save(update_fields=["ducky_coins"])
-        self.attack = AttackItem.objects.create(
-            name="Syntax Lock",
-            description="Bloqueo temporal.",
-            family=AttackItem.Family.LOCK,
-            effect=AttackItem.Effect.LOCK,
-            rarity=AttackItem.Rarity.RARE,
-            duration_seconds=8,
-            cooldown_seconds=24,
-            price=90,
-            activation_challenge="Identifica la categoría correcta.",
-        )
-
-    def test_purchase_spends_coins_and_adds_a_charge(self):
-        owned_attack = purchase_attack(self.user, self.attack)
-
-        self.profile.refresh_from_db()
-        self.assertEqual(self.profile.ducky_coins, 110)
-        self.assertEqual(owned_attack.quantity, 1)
-        self.assertEqual(AttackInventory.objects.count(), 1)
-
-    def test_purchase_rejects_an_insufficient_balance(self):
-        self.profile.ducky_coins = 0
-        self.profile.save(update_fields=["ducky_coins"])
-
-        with self.assertRaises(ValidationError):
-            purchase_attack(self.user, self.attack)
-        self.assertFalse(AttackInventory.objects.exists())

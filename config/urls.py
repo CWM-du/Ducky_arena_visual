@@ -27,7 +27,6 @@ urlpatterns = [
         include("accounts.urls"),
     ),
     path("", include("core.urls")),
-    path("duckies/", include("duckies.urls")),
 
 ]
 

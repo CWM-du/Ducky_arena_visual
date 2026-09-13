@@ -16,7 +16,52 @@
             </div>
         </div>
         <div class="ducky-name">{{ ducky.name }}</div>
-        <div class="ducky-meta">Ducky personal · Nivel de identidad</div>
+        <div class="ducky-meta">Ducky personal · Equipamiento actual</div>
+
+        <div class="equipped-visuals" aria-label="Equipamiento actual de {{ ducky.name }}">
+            {% for item_type, label in item_types %}
+            <div class="equipped-visual-card">
+                <div class="equipped-visual-type">{{ label }}</div>
+                {% if item_type == "HEAD" %}
+                    {% with equipped=equipped_by_type.HEAD %}
+                        {% if equipped %}
+                            {% if equipped.item.image %}<img src="{{ equipped.item.image.url }}" alt="{{ equipped.item.name }}">{% else %}<span class="equipped-visual-empty">Sin imagen</span>{% endif %}
+                            <strong>{{ equipped.item.name }}</strong>
+                        {% else %}
+                            <span class="equipped-visual-empty">Ninguno</span>
+                        {% endif %}
+                    {% endwith %}
+                {% elif item_type == "EYES" %}
+                    {% with equipped=equipped_by_type.EYES %}
+                        {% if equipped %}
+                            {% if equipped.item.image %}<img src="{{ equipped.item.image.url }}" alt="{{ equipped.item.name }}">{% else %}<span class="equipped-visual-empty">Sin imagen</span>{% endif %}
+                            <strong>{{ equipped.item.name }}</strong>
+                        {% else %}
+                            <span class="equipped-visual-empty">Ninguno</span>
+                        {% endif %}
+                    {% endwith %}
+                {% elif item_type == "BODY" %}
+                    {% with equipped=equipped_by_type.BODY %}
+                        {% if equipped %}
+                            {% if equipped.item.image %}<img src="{{ equipped.item.image.url }}" alt="{{ equipped.item.name }}">{% else %}<span class="equipped-visual-empty">Sin imagen</span>{% endif %}
+                            <strong>{{ equipped.item.name }}</strong>
+                        {% else %}
+                            <span class="equipped-visual-empty">Ninguno</span>
+                        {% endif %}
+                    {% endwith %}
+                {% elif item_type == "ACCESSORY" %}
+                    {% with equipped=equipped_by_type.ACCESSORY %}
+                        {% if equipped %}
+                            {% if equipped.item.image %}<img src="{{ equipped.item.image.url }}" alt="{{ equipped.item.name }}">{% else %}<span class="equipped-visual-empty">Sin imagen</span>{% endif %}
+                            <strong>{{ equipped.item.name }}</strong>
+                        {% else %}
+                            <span class="equipped-visual-empty">Ninguno</span>
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
     </div>
 
     <div class="panel profile-panel">
