@@ -31,7 +31,7 @@ class InventoryItemAdmin(admin.ModelAdmin):
 @admin.register(Attack)
 class AttackAdmin(admin.ModelAdmin):
     list_display = ("name", "effect_type", "language", "power", "duration_seconds", "cooldown_seconds", "difficulty", "is_active")
-    readonly_fields = ("created_at",)
+
     list_filter = ("effect_type", "language", "difficulty", "is_active")
     search_fields = ("name", "description", "language")
 
