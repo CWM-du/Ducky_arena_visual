@@ -14,7 +14,7 @@
         <nav class="nav">
             <a href="{% url 'duckies:my_ducky' %}">Mi Ducky</a>
             <a href="{% url 'duckies:inventory' %}">Inventario</a>
-            <a href="{% url 'duckies:attack_shop' %}">Tienda de ataques</a>
+            {% comment %} pending team 2 & 4 <a href="{% url 'duckies:attack_shop' %}">Tienda de ataques</a> {% endcomment %}
         </nav>
         {% if request.user.is_authenticated %}<span class="muted">{{ request.user.username }}</span>{% endif %}
     </header>
