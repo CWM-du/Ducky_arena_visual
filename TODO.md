@@ -40,8 +40,8 @@
 - [x] Imágenes separadas entre STATIC y MEDIA.
 - [x] Mensajes de éxito/error en las operaciones principales.
 - [x] Tests automatizados para modelos, inventario, equipamiento y seguridad presentes en `duckies/tests/`.
-- [ ] Ejecutar `python manage.py check --deploy`.
-- [ ] Ejecutar `python manage.py test duckies`.
+- [x] Ejecutar `python manage.py check --deploy`. pasa sin errores, pero presenta advertencias de configuración para producción.
+- [x] Ejecutar `python manage.py test duckies`.
 - [ ] Ejecutar pruebas manuales de ownership con dos usuarios reales.
 - [ ] Probar layouts mobile/tablet/desktop.
 - [ ] Probar navegación por teclado y estados de foco visibles.
