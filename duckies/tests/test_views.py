@@ -42,18 +42,18 @@ class DuckyViewTests(TestCase):
         response = self.client.get(reverse("duckies:my_ducky"))
         self.assertEqual(response.status_code, 302)
 
-def test_my_ducky_shows_equipped_item_image(self):
-    self.carlos_inventory.equipped = True
-    self.carlos_inventory.save(update_fields=["equipped"])
+    def test_my_ducky_shows_equipped_item_image(self):
+        self.carlos_inventory.equipped = True
+        self.carlos_inventory.save(update_fields=["equipped"])
 
-    self.carlos_inventory.item.image = "ducky_items/sombrero-python.png"
-    self.carlos_inventory.item.save(update_fields=["image"])
+        self.carlos_inventory.item.image = "ducky_items/sombrero-python.png"
+        self.carlos_inventory.item.save(update_fields=["image"])
 
-    self.client.login(username="carlos", password="pass12345")
-    response = self.client.get(reverse("duckies:my_ducky"))
+        self.client.login(username="carlos", password="pass12345")
+        response = self.client.get(reverse("duckies:my_ducky"))
 
-    self.assertContains(response, "Sombrero Python")
-    self.assertContains(response, "ducky_items/sombrero-python.png")
+        self.assertContains(response, "Sombrero Python")
+        self.assertContains(response, "ducky_items/sombrero-python.png")
 
     def test_user_sees_only_own_inventory(self):
         self.client.login(username="carlos", password="pass12345")
